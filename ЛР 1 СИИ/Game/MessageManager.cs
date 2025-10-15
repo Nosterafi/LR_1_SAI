@@ -24,23 +24,24 @@
         public string GetMessage()
         {
             var origColor = Console.ForegroundColor;
-
-            Console.ForegroundColor = mainColor;
-            Console.WriteLine("Игрок:");
-
-            Console.ForegroundColor = messageColor;
-            var result = Console.ReadLine();
             
-            while (String.IsNullOrWhiteSpace(result))
+            while (true)
             {
-                PrintMessage("Похоже, что вы ввели пустую строку. Повторите ввод.");
-                result = Console.ReadLine();
+                Console.ForegroundColor = mainColor;
+                Console.WriteLine("Игрок:");
+
+                Console.ForegroundColor = messageColor;
+                var result = Console.ReadLine();
+
+                if (!String.IsNullOrWhiteSpace(result))
+                {
+                    Console.WriteLine();
+                    Console.ForegroundColor = origColor;
+                    return result;
+                }
+                else
+                    PrintMessage("Похоже, что вы ввели пустую строку. Повторите ввод.");
             }
-
-            Console.WriteLine();
-
-            Console.ForegroundColor = origColor;
-            return result;
         }
     }
 }
