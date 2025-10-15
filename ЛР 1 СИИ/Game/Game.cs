@@ -56,7 +56,8 @@ namespace LR1_SAI
                 }
                 else
                 {
-                    messageManager.PrintMessage("К сожалению я не поняла. Введите один из допустимых запросов.");
+                    messageManager.PrintMessage("К сожалению я не поняла, что вы имели ввиду. " +
+                        "Введите один из допустимых запросов.");
                     continue;
                 }
             }
@@ -116,7 +117,7 @@ namespace LR1_SAI
 
         private void CheckAvailability()
         {
-            messageManager.PrintMessage("Напишите, какой именно прибор вас интерисует.");
+            messageManager.PrintMessage("Напишите, какой именно прибор вас интересует.");
             var deviceName = messageManager.GetMessage();
 
             if (!knlBase.Contains(new Node<string>(deviceName, NodeType.Object)))
