@@ -19,9 +19,15 @@ namespace LR1_SAI
             saveManager = new SaveManager(savePath);
             messageManager = new MessageManager(mainColor, messageColor);
 
-            knlBase = saveManager.ReadSave<KnowledgeBase>() ?? new KnowledgeBase(defaultObjName);
+            knlBase = saveManager.ReadSave<KnowledgeBase>();
+            if (knlBase == null)
+            {
+                messageManager.PrintMessage("К сожалению, при чтении сохранения произошла ошибка.\n" +
+                    "Сейчас используется база знаний по-умолчанию.");
+                knlBase = new KnowledgeBase(defaultObjName);
+            }
+            
             knlBase.MoveTop();
-
             actions = new()
             {
                 { "Давай сыграем.", SearchAnswer },
