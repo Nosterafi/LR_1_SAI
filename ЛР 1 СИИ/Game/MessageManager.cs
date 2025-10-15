@@ -21,7 +21,7 @@
             Console.ForegroundColor = origColor;
         }
 
-        public string? GetMessage()
+        public string GetMessage()
         {
             var origColor = Console.ForegroundColor;
 
@@ -30,6 +30,13 @@
 
             Console.ForegroundColor = messageColor;
             var result = Console.ReadLine();
+            
+            while (String.IsNullOrWhiteSpace(result))
+            {
+                PrintMessage("Похоже, что вы ввели пустую строку. Повторите ввод.");
+                result = Console.ReadLine();
+            }
+
             Console.WriteLine();
 
             Console.ForegroundColor = origColor;

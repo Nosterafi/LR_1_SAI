@@ -42,9 +42,9 @@ namespace LR1_SAI
             {
                 var message = messageManager.GetMessage();
 
-                if (message != null && actions.TryGetValue(message, out Action? value))
+                if (actions.TryGetValue(message, out Action? action))
                 {
-                    value.Invoke();
+                    action.Invoke();
                     messageManager.PrintMessage($"Чем я теперь могу быть полезна?\n{GetCommandSet()}");
                     knlBase?.MoveTop();
                 }
