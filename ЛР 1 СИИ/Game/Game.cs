@@ -66,6 +66,12 @@ namespace LR1_SAI
         private void SearchAnswer()
         {
             messageManager.PrintMessage("Давай.");
+            messageManager.PrintMessage("Правила таковы:\n" +
+                "1) Сначала вы загадывайте бытовой прибор;\n" +
+                "2) После этого я пытаюсь с помощью вопросов его угадать.\n\n" +
+                "Нажмите любую кнопку клавиатуры, если уже загадали прибор.");
+            Console.ReadKey();
+            messageManager.PrintMessage("Отлично. Начинаем.");
 
             while (true)
             {
@@ -147,7 +153,7 @@ namespace LR1_SAI
                 .Skip(1);
 
             var reasonongsStr = String.Join('\n', reasonings);
-            messageManager.PrintMessage($"{reasonongsStr}\n\n    Следственно, это {resultAnswer}.");
+            messageManager.PrintMessage($"{reasonongsStr}\n\n    Следовательно, это {resultAnswer}.");
         }
 
         private void Train(bool lastAnswer)
