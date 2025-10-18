@@ -153,7 +153,7 @@ namespace LR1_SAI
                 .Skip(1);
 
             var reasonongsStr = String.Join('\n', reasonings);
-            messageManager.PrintMessage($"{reasonongsStr}\n\n    Следовательно, это {resultAnswer}.");
+            messageManager.PrintMessage($"{reasonongsStr}\n\nСледовательно, это {resultAnswer}.");
         }
 
         private void Train(bool lastAnswer)

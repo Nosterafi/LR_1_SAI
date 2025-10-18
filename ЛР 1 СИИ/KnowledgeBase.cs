@@ -87,18 +87,23 @@ public class KnowledgeBase
             var info = new List<string>();
             var builder = new StringBuilder($"{currentNode.Value}:\n");
             var lastNodeHash = currentNode.GetHashCode();
-            
-            while (currentNode.ParentNodeHash != null)
-            {
-                currentNode = nodes[currentNode.ParentNodeHash.Value];
-                var correctAnswer = lastNodeHash == currentNode.TrueNodeHash ? "да" : "нет";
-                
-                if (currentNode.Type == NodeType.Object)
-                    info.Add($"Это {currentNode.Value}? -> {correctAnswer}");
-                else
-                    info.Add($"{currentNode.Value}? -> {correctAnswer}");
-            }
 
+            if (currentNode.GetHashCode() == topNodeHash)
+                info.Add($"    {currentNode.Value}? -> да");
+            else
+            {
+                while (currentNode.ParentNodeHash != null)
+                {
+                    currentNode = nodes[currentNode.ParentNodeHash.Value];
+                    var correctAnswer = lastNodeHash == currentNode.TrueNodeHash ? "да" : "нет";
+
+                    if (currentNode.Type == NodeType.Object)
+                        info.Add($"Это {currentNode.Value}? -> {correctAnswer}");
+                    else
+                        info.Add($"{currentNode.Value}? -> {correctAnswer}");
+                }
+            }
+                
             info.Reverse();
 
             foreach (var note in info)
