@@ -23,7 +23,7 @@ public class KnowledgeBase
     public KnowledgeBase() { }
 
     [JsonConstructor]
-    public KnowledgeBase(
+    private KnowledgeBase(
         int topNodeHash,
         Dictionary<int, Node<string>> nodes,
         int currentNodeHash)

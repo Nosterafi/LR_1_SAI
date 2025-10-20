@@ -21,7 +21,7 @@ namespace LR1_SAI
         public int? FalseNodeHash { get; set; }
 
         [JsonConstructor]
-        public Node(ValueType value,
+        private Node(ValueType value,
             NodeType type,
             int? parentNodeHash,
             int? trueNodeHash,
