@@ -28,10 +28,17 @@ namespace LR1_SAI
 
         public void Save<DataType>(DataType data)
         {
-            CheckSavePath();
+            try
+            {
+                CheckSavePath();
 
-            using var writeStream = File.Create(savePath);
-            JsonSerializer.Serialize(writeStream, data, options);
+                using var writeStream = File.Create(savePath);
+                JsonSerializer.Serialize(writeStream, data, options);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка при сохранении: {ex.Message}");
+            }
         }
 
         private void CheckSavePath()

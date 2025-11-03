@@ -1,0 +1,32 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UI"
+        xmlns:System="clr-namespace:System;assembly=System.Runtime" x:Class="UI.MainWindow"
+        mc:Ignorable="d"
+        Title="Лабораторная работа №1" MinHeight="550" MinWidth="400" Width="400">
+
+    <DockPanel Margin="10,10,10,10" LastChildFill="True">
+        <DockPanel LastChildFill="True" DockPanel.Dock="Bottom">
+            <Button Name="SendButton"  Content="Отправить" Height="22" Width="80" VerticalAlignment="Bottom" Click="SendButton_Click"/>
+            <ComboBox Name="messageComboBox" IsEditable="True" VerticalAlignment="Center" FontFamily="Arial" FontSize="14" ItemsSource="{Binding Path=Tips, Mode=OneWay}"/>
+        </DockPanel>
+
+        <Label 
+            Content="Сообщение:"
+            Height="30"  
+            DockPanel.Dock="Bottom"
+            FontFamily="Calibri" 
+            FontSize="18" 
+            FontWeight="Bold" Margin="0,10,0,0"/>
+
+        <TextBox 
+            Name="ChatTextBox" 
+            FontFamily="Arial" 
+            FontSize="14" 
+            BorderBrush="Black"
+            <!--Text="{Binding Chat.Messages, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"-->/>
+    </DockPanel>
+</Window>

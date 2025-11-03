@@ -1,47 +1,49 @@
-﻿namespace LR1_SAI
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Text;
+
+namespace LR1_SAI
 {
-    public class MessageManager(ConsoleColor mainColor, ConsoleColor messageColor)
+    public class MessageManager : INotifyPropertyChanged
     {
-        private readonly ConsoleColor mainColor = mainColor;
-        private readonly ConsoleColor messageColor = messageColor;
+        private readonly object locker = new object();
 
-        public void PrintMessage(string message)
+        private List<string> messages = new();
+        private string? resMes;
+
+        public string[] Messages => [.. messages];
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public string ReadMessage()
         {
-            var origColor = Console.ForegroundColor;
-
-            Console.ForegroundColor = mainColor;
-            Console.WriteLine("Программа:");
-
-            if (message.Length > 0)
+            lock (locker)
             {
-                Console.ForegroundColor = messageColor;
-                Console.WriteLine(message + "\n");
-            }
-            
-            Console.ForegroundColor = origColor;
-        }
+                resMes = null;
 
-        public string GetMessage()
-        {
-            var origColor = Console.ForegroundColor;
-            
-            while (true)
-            {
-                Console.ForegroundColor = mainColor;
-                Console.WriteLine("Игрок:");
-
-                Console.ForegroundColor = messageColor;
-                var result = Console.ReadLine();
-
-                if (!String.IsNullOrWhiteSpace(result))
+                while (resMes == null)
                 {
-                    Console.WriteLine();
-                    Console.ForegroundColor = origColor;
-                    return result;
+                    Monitor.Wait(locker);
                 }
-                else
-                    PrintMessage("Похоже, что вы ввели пустую строку. Повторите ввод.");
+
+                var result = resMes;
+                resMes = null;
+                return result;
             }
         }
+
+        public void SendMessage(string senderName, string message)
+        {
+            lock (locker)
+            {
+                Monitor.Pulse(locker);
+                resMes = message;
+                messages.Add($"{senderName}:\n{message}\n");
+                OnPropertyChanged(nameof(Messages));
+            }
+        }
+
+        protected virtual void OnPropertyChanged(string propertyName = "") =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

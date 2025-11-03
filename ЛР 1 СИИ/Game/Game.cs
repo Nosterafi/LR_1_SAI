@@ -2,27 +2,29 @@
 
 namespace LR1_SAI
 {
-    public class Game
+    public class Game : IGame
     {
         private const string savePath = "Save.json";
         private const string defaultObjName = "Холодильник";
-        private const ConsoleColor mainColor = ConsoleColor.Green;
-        private const ConsoleColor messageColor = ConsoleColor.Yellow;
 
         private readonly KnowledgeBase? knlBase;
         private readonly Dictionary<string, Action> actions;
-        private readonly SaveManager saveManager;
         private readonly MessageManager messageManager;
+        private readonly SaveManager saveManager = new(savePath);
 
-        public Game()
+        public string[] InitialRequests => [.. actions.Keys];
+
+        public string[] ObjectsNames => knlBase.ObjectsNames;
+
+        public Game(MessageManager messageManager)
         {
+            this.messageManager = messageManager;
             saveManager = new SaveManager(savePath);
-            messageManager = new MessageManager(mainColor, messageColor);
-
             knlBase = saveManager.ReadSave<KnowledgeBase>();
+
             if (knlBase == null)
             {
-                messageManager.PrintMessage("К сожалению, при чтении сохранения произошла ошибка.\n" +
+                SendMessage("К сожалению, при чтении сохранения произошла ошибка.\n" +
                     "Сейчас используется база знаний по-умолчанию.");
                 knlBase = new KnowledgeBase(defaultObjName);
             }
@@ -41,22 +43,22 @@ namespace LR1_SAI
 
         public void Run()
         {
-            messageManager.PrintMessage("Добро пожаловать в игру \"Угадай бытовой прибор\".");
-            messageManager.PrintMessage(GetCommandSet());
+            SendMessage("Добро пожаловать в игру \"Угадай бытовой прибор\".");
+            SendMessage(GetCommandSet());
 
             while (true)
             {
-                var message = messageManager.GetMessage();
+                var message = messageManager.ReadMessage();
 
                 if (actions.TryGetValue(message, out Action? action))
                 {
                     action.Invoke();
-                    messageManager.PrintMessage($"Чем я теперь могу быть полезна?\n{GetCommandSet()}");
+                    SendMessage($"Чем я теперь могу быть полезна?\n{GetCommandSet()}");
                     knlBase?.MoveTop();
                 }
                 else
                 {
-                    messageManager.PrintMessage("К сожалению я не поняла, что вы имели ввиду. " +
+                    SendMessage("К сожалению я не поняла, что вы имели ввиду. " +
                         "Введите один из допустимых запросов.");
                     continue;
                 }
@@ -65,13 +67,11 @@ namespace LR1_SAI
 
         private void SearchAnswer()
         {
-            messageManager.PrintMessage("Давай.");
-            messageManager.PrintMessage("Правила таковы:\n" +
+            SendMessage("Давай.");
+            SendMessage("Правила таковы:\n" +
                 "1) Сначала вы загадывайте бытовой прибор;\n" +
                 "2) После этого я пытаюсь с помощью вопросов его угадать.\n\n" +
-                "Нажмите любую кнопку клавиатуры, если уже загадали прибор.");
-            Console.ReadKey();
-            messageManager.PrintMessage("Отлично. Начинаем.");
+                "НАЧИНАЕМ!!!");
 
             while (true)
             {
@@ -79,13 +79,13 @@ namespace LR1_SAI
                     $"Это {knlBase.CurrentValue}?" : 
                     $"{knlBase.CurrentValue}?";
 
-                messageManager.PrintMessage(programText);
+                SendMessage(programText);
                 var answer = GetAnswer();
 
                 if (answer && knlBase.CurrentType == NodeType.Object)
                 {
-                    messageManager.PrintMessage("Ура. Я выйграла.");
-                    messageManager.PrintMessage("Вы хотите, чтобы я объяснила логику ответа?");
+                    SendMessage("Ура. Я выйграла.");
+                    SendMessage("Вы хотите, чтобы я объяснила логику ответа?");
 
                     if(GetAnswer())
                         ExplainAnswer(knlBase.CurrentValue);
@@ -95,54 +95,53 @@ namespace LR1_SAI
 
                 if (!knlBase.TryMoveDown(answer))
                 {
-                    messageManager.PrintMessage("Сдаюсь.");
+                    SendMessage("Сдаюсь.");
                     Train(answer);
                     break;
                 } 
             }
         }
 
-        private void PrintBase() => messageManager.PrintMessage(knlBase.ToString());
+        private void PrintBase() => SendMessage(knlBase.ToString());
             
         private void PrintObjectInfo()
         {
-            messageManager.PrintMessage("Без проблем. Назовите прибор, о котором вы хотите меня спросить.");
-            var deviceName = messageManager.GetMessage();
-            var objInfo = string.Empty;
+            SendMessage("Без проблем. Назовите прибор, о котором вы хотите меня спросить.");
+            var isSucces = TryGetObjectName(out string? deviceName);
 
-            try { objInfo = knlBase.GetNodeInfo(new Node<string>(deviceName, NodeType.Object)); }
-            catch (InvalidOperationException)
+            if (!isSucces)
             {
-                messageManager.PrintMessage("К сожалению, я ничего не знаю о данном приборе.");
+                SendMessage("К сожалению, мне ничего не известно об этом приборе.");
                 return;
             }
 
-            messageManager.PrintMessage(objInfo);
-            Console.WriteLine();
+            var objInfo = knlBase.GetNodeInfo(new Node<string>(deviceName, NodeType.Object));
+            SendMessage(objInfo);
         }
 
         private void CheckAvailability()
         {
-            messageManager.PrintMessage("Напишите, какой именно прибор вас интересует.");
-            var deviceName = messageManager.GetMessage();
+            SendMessage("Напишите, какой именно прибор вас интересует.");
+            var isSucces = TryGetObjectName(out string? deviceName);
 
-            if (!knlBase.Contains(new Node<string>(deviceName, NodeType.Object)))
+            if (!isSucces)
             {
-                messageManager.PrintMessage("Я ничего не знаю об этом приборе.");
+                SendMessage("К сожалению, мне ничего не известно об этом приборе.");
                 return;
             }
 
-            messageManager.PrintMessage("Да, мне известно об этом приборе.");
-            messageManager.PrintMessage("Хотите узнать, Что именно я о нём знаю?");
+            SendMessage("Да, мне известно об этом приборе.");
+            SendMessage("Хотите узнать, Что именно я о нём знаю?");
+
             var answer = GetAnswer();
 
             if (!answer)
             {
-                messageManager.PrintMessage("Хорошо.");
+                SendMessage("Хорошо.");
                 return;
             }
 
-            messageManager.PrintMessage(knlBase.GetNodeInfo(new Node<string>(deviceName, NodeType.Object)));
+            SendMessage(knlBase.GetNodeInfo(new Node<string>(deviceName, NodeType.Object)));
         }
 
         private void ExplainAnswer(string resultAnswer)
@@ -153,34 +152,34 @@ namespace LR1_SAI
                 .Skip(1);
 
             var reasonongsStr = String.Join('\n', reasonings);
-            messageManager.PrintMessage($"{reasonongsStr}\n\nСледовательно, это {resultAnswer}.");
+            SendMessage($"{reasonongsStr}\n\nСледовательно, это {resultAnswer}.");
         }
 
         private void Train(bool lastAnswer)
         {
-            messageManager.PrintMessage("Какой прибор вы загадали?");
-            var deviceName = messageManager.GetMessage();
+            SendMessage("Какой прибор вы загадали?");
+            var deviceName = messageManager.ReadMessage();
 
             if (knlBase.Contains(new Node<string>(deviceName, NodeType.Object)))
             {
-                messageManager.PrintMessage($"Серьёзно? Я точно помню признаки прибора {deviceName}. " +
+                SendMessage($"Серьёзно? Я точно помню признаки прибора {deviceName}. " +
                     "Они не совпадают с тем, что мне говорили ранее.");
 
                 return;
             }
 
-            messageManager.PrintMessage($"Сформулируйте вопрос, который поможет распознать прибор {deviceName}.");
-            var question = messageManager.GetMessage();
+            SendMessage($"Сформулируйте вопрос, который поможет распознать прибор {deviceName}.");
+            var question = messageManager.ReadMessage();
 
             while (knlBase.Contains(new Node<string>(question, NodeType.Question)))
             {
-                messageManager.PrintMessage("Такой вопрос в базе знаний уже присутствует. " +
+                SendMessage("Такой вопрос в базе знаний уже присутствует. " +
                     "Сформулируйте неизвестный мне вопрос.");
 
-                question =  messageManager.GetMessage();
+                question =  messageManager.ReadMessage();
             }
 
-            messageManager.PrintMessage("Подскажите правильный ответ на него: да или нет.");
+            SendMessage("Подскажите правильный ответ на него: да или нет.");
             var answer = GetAnswer();
 
             knlBase.AddNode(question, NodeType.Question, lastAnswer);
@@ -188,19 +187,40 @@ namespace LR1_SAI
             knlBase.AddNode(deviceName, NodeType.Object, answer);
 
             knlBase.MoveTop();
-            messageManager.PrintMessage($"Отлично. Теперь я знаю о приборе {deviceName}. Спасибо за информацию.");
+            SendMessage($"Отлично. Теперь я знаю о приборе {deviceName}. Спасибо за информацию.");
         }
+
+        private void SendMessage(string message) =>
+            messageManager.SendMessage("Программа", message);
 
         private bool GetAnswer()
         {
             while (true)
             {
-                var answer = messageManager.GetMessage()?.ToLower();
+                var answer = messageManager.ReadMessage()?.ToLower();
 
-                if (answer == "да") return true;
-                if (answer == "нет") return false;
+                if (answer != "да" && answer != "нет")
+                    SendMessage("Я не поняла ваш ответ. Напишите: \"да\" или \"нет\".");
+                else
+                {
+                    return answer == "да";
+                }
+            }
+        }
 
-                messageManager.PrintMessage("Я не поняла ваш ответ. Напишите: \"да\" или \"нет\".");
+        private bool TryGetObjectName(out string? deviceName)
+        {
+            var result = messageManager.ReadMessage();
+
+            if (knlBase.Contains(new Node<string>(result, NodeType.Object)))
+            {
+                deviceName = result;
+                return true;
+            }
+            else
+            {
+                deviceName = null;
+                return false;
             }
         }
 

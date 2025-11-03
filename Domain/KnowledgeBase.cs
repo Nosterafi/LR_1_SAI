@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace LR1_SAI;
 
-public class KnowledgeBase : IHierarchicalBase
+public class KnowledgeBase
 {
     [JsonInclude]
     private readonly int topNodeHash;
@@ -15,10 +15,6 @@ public class KnowledgeBase : IHierarchicalBase
     private int currentNodeHash;
 
     private Node<string> CurrentNode => nodes[currentNodeHash];
-
-    public string[] ObjectsNames => [.. nodes
-        .Where(x => x.Value.Type == NodeType.Object)
-        .Select(x => x.Value.Value)];
 
     public string CurrentValue => CurrentNode.Value;
 
