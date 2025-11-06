@@ -189,7 +189,7 @@ namespace LR1_SAI
                 return;
             }
 
-            SendMessage($"Сформулируйте вопрос, который поможет распознать прибор {deviceName} " +
+            SendMessage($"Сформулируйте вопрос, который поможет распознать прибор \"{deviceName}\" " +
                 "(без '?' в конце).");
             var question = GetUnknownTypeAnswer();
 
@@ -209,7 +209,7 @@ namespace LR1_SAI
             knlBase.AddNode(deviceName, NodeType.Object, answer);
 
             knlBase.MoveTop();
-            SendMessage($"Отлично. Теперь я знаю о приборе {deviceName}. Спасибо за информацию.");
+            SendMessage($"Отлично. Теперь я знаю о приборе \"{deviceName}\". Спасибо за информацию.");
         }
 
         private bool GetAnswer()

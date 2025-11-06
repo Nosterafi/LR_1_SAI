@@ -49,8 +49,6 @@ namespace LR1_SAI
             if (string.IsNullOrWhiteSpace(savePath))
                 throw new ArgumentException("Путь к файлу не установлен");
 
-            Console.WriteLine(Directory.GetCurrentDirectory());
-
             if (!File.Exists(savePath))
                 throw new FileNotFoundException($"Файл {savePath} не найден");
         }
