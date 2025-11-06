@@ -1,46 +1,34 @@
 ﻿using LR1_SAI;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
 namespace UI
 {
-    class ViewModel
+    public class ViewModel : INotifyPropertyChanged
     {
         private readonly IGame game;
+        private readonly MessageManager chat;
+        
+        public string Messages => chat.Messages;
 
-        public readonly MessageManager Chat;
+        public string[] Tips => game.Tips;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public ViewModel()
         {
-            Chat = new MessageManager();
-            game = new Game(Chat);
+            chat = new MessageManager();
+            game = new Game(chat);
+
+            chat.PropertyChanged += (a, b) => OnPropertyChanged(nameof(Messages));
+            game.PropertyChanged += (a, b) => OnPropertyChanged(nameof(Tips));
 
             Task.Run(() => game.Run());
         }
 
-        //TODO
-        public string[] GetTips()
-        {
-            var messages = Chat.Messages;
+        public void SendMessage(string message) =>
+            chat.SendMessage("Игрок", message);
 
-            if (messages[] == "Давай сыграем." || lastAiMessage == "Вы хотите, чтобы я объяснила логику ответа?")
-            {
-                return ["да", "нет"];
-            }
-            else if (lastAiMessage == "Я хочу узнать, что ты знаешь об одном из приборов." ||
-                lastAiMessage == "Я хочу узнать, известно ли тебе о нужном мне приборе.")
-            {
-                return game.ObjectsNames;
-            }
-            else if (lastAiMessage == "Какой прибор вы загадали?")
-            {
-                return [];
-            }
-            else if (lastAiMessage == "Чем я теперь могу быть полезна?")
-            {
-                return game.InitialRequests;
-            }
-            else 
-        }
+        private void OnPropertyChanged(string propertyName) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

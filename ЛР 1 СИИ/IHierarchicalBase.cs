@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-
-namespace LR1_SAI
+﻿namespace LR1_SAI
 {
     public interface IHierarchicalBase
     {

@@ -1,10 +1,10 @@
-﻿namespace LR1_SAI
-{
-    public interface IGame
-    {
-        public string[] InitialRequests { get; }
+﻿using System.ComponentModel;
 
-        public string[] ObjectsNames { get; }
+namespace LR1_SAI
+{
+    public interface IGame : INotifyPropertyChanged
+    {
+        public string[] Tips { get; }
 
         public void Run();
     }

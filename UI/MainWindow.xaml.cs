@@ -13,17 +13,12 @@ namespace UI
         {
             DataContext = viewModel;
             InitializeComponent();
-            //messageComboBox.ItemsSource = viewModel.Tips;
-            Console.WriteLine(viewModel.Chat.Messages);
         }
 
-        private void SendButton_Click(object sender, RoutedEventArgs e)
-        {
-            ((ViewModel)DataContext).Chat.SendMessage("Игрок", messageComboBox.Text);
-            messageComboBox.ItemsSource = viewModel.Tips;
-            
-            Console.Clear();
-            Console.WriteLine(viewModel.Chat.Messages);
-        }
+        private void SendButton_Click(object sender, RoutedEventArgs e) =>
+            viewModel.SendMessage(messageComboBox.Text);
+
+        private void ChatTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e) =>
+            ChatTextBox.ScrollToEnd();
     }
 }

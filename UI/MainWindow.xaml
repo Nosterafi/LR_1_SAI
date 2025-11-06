@@ -6,12 +6,19 @@
         xmlns:local="clr-namespace:UI"
         xmlns:System="clr-namespace:System;assembly=System.Runtime" x:Class="UI.MainWindow"
         mc:Ignorable="d"
-        Title="Лабораторная работа №1" MinHeight="550" MinWidth="400" Width="400">
+        Title="Лабораторная работа №1" MinHeight="550" MinWidth="400" Width="500">
 
     <DockPanel Margin="10,10,10,10" LastChildFill="True">
         <DockPanel LastChildFill="True" DockPanel.Dock="Bottom">
             <Button Name="SendButton"  Content="Отправить" Height="22" Width="80" VerticalAlignment="Bottom" Click="SendButton_Click"/>
-            <ComboBox Name="messageComboBox" IsEditable="True" VerticalAlignment="Center" FontFamily="Arial" FontSize="14" ItemsSource="{Binding Path=Tips, Mode=OneWay}"/>
+            
+            <ComboBox 
+                Name="messageComboBox" 
+                IsEditable="True" 
+                VerticalAlignment="Center" 
+                FontFamily="Arial" 
+                FontSize="14" 
+                ItemsSource="{Binding Path=Tips, Mode=OneWay}"/>
         </DockPanel>
 
         <Label 
@@ -27,6 +34,9 @@
             FontFamily="Arial" 
             FontSize="14" 
             BorderBrush="Black"
-            <!--Text="{Binding Chat.Messages, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"-->/>
+            IsReadOnly="True"
+            Text="{Binding Path=Messages, Mode=OneWay}"
+            TextWrapping="Wrap"
+            TextChanged="ChatTextBox_TextChanged"/>
     </DockPanel>
 </Window>

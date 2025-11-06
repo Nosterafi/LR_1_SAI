@@ -1,6 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace LR1_SAI
 {
@@ -11,7 +9,7 @@ namespace LR1_SAI
         private List<string> messages = new();
         private string? resMes;
 
-        public string[] Messages => [.. messages];
+        public string Messages => String.Join("\n\n", messages);
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -27,6 +25,7 @@ namespace LR1_SAI
                 }
 
                 var result = resMes;
+                
                 resMes = null;
                 return result;
             }
@@ -43,7 +42,7 @@ namespace LR1_SAI
             }
         }
 
-        protected virtual void OnPropertyChanged(string propertyName = "") =>
+        protected void OnPropertyChanged(string propertyName = "") =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

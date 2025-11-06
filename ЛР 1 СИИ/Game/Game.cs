@@ -1,4 +1,4 @@
-﻿using System.Text;
+﻿using System.ComponentModel;
 
 namespace LR1_SAI
 {
@@ -12,9 +12,25 @@ namespace LR1_SAI
         private readonly MessageManager messageManager;
         private readonly SaveManager saveManager = new(savePath);
 
-        public string[] InitialRequests => [.. actions.Keys];
+        private RequiredAnswerType reqAnsType;
 
-        public string[] ObjectsNames => knlBase.ObjectsNames;
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public string[] Tips
+        {
+            get
+            {
+                if (reqAnsType == RequiredAnswerType.InitialRequests)
+                    return [.. actions.Keys];
+                else if (reqAnsType == RequiredAnswerType.Boolean)
+                    return ["да", "нет"];
+                else if (reqAnsType == RequiredAnswerType.ObjNames)
+                    return knlBase.ObjectsNames;
+                else if (reqAnsType == RequiredAnswerType.Unknown)
+                    return Array.Empty<string>();
+                else throw new InvalidOperationException("Данный тип запроса не предусмотрен.");
+            }
+        }
 
         public Game(MessageManager messageManager)
         {
@@ -44,16 +60,16 @@ namespace LR1_SAI
         public void Run()
         {
             SendMessage("Добро пожаловать в игру \"Угадай бытовой прибор\".");
-            SendMessage(GetCommandSet());
 
             while (true)
             {
+                SetRequiredAnswerType(RequiredAnswerType.InitialRequests);
                 var message = messageManager.ReadMessage();
 
                 if (actions.TryGetValue(message, out Action? action))
                 {
                     action.Invoke();
-                    SendMessage($"Чем я теперь могу быть полезна?\n{GetCommandSet()}");
+                    SendMessage($"Чем я теперь могу быть полезна?");
                     knlBase?.MoveTop();
                 }
                 else
@@ -70,7 +86,7 @@ namespace LR1_SAI
             SendMessage("Давай.");
             SendMessage("Правила таковы:\n" +
                 "1) Сначала вы загадывайте бытовой прибор;\n" +
-                "2) После этого я пытаюсь с помощью вопросов его угадать.\n\n" +
+                "2) После этого я пытаюсь с помощью вопросов его угадать.\n" +
                 "НАЧИНАЕМ!!!");
 
             while (true)
@@ -158,7 +174,7 @@ namespace LR1_SAI
         private void Train(bool lastAnswer)
         {
             SendMessage("Какой прибор вы загадали?");
-            var deviceName = messageManager.ReadMessage();
+            var deviceName = GetUnknownTypeAnswer();
 
             if (knlBase.Contains(new Node<string>(deviceName, NodeType.Object)))
             {
@@ -168,15 +184,16 @@ namespace LR1_SAI
                 return;
             }
 
-            SendMessage($"Сформулируйте вопрос, который поможет распознать прибор {deviceName}.");
-            var question = messageManager.ReadMessage();
+            SendMessage($"Сформулируйте вопрос, который поможет распознать прибор {deviceName} " +
+                "(без '?' в конце).");
+            var question = GetUnknownTypeAnswer();
 
             while (knlBase.Contains(new Node<string>(question, NodeType.Question)))
             {
                 SendMessage("Такой вопрос в базе знаний уже присутствует. " +
                     "Сформулируйте неизвестный мне вопрос.");
 
-                question =  messageManager.ReadMessage();
+                question =  GetUnknownTypeAnswer();
             }
 
             SendMessage("Подскажите правильный ответ на него: да или нет.");
@@ -190,14 +207,13 @@ namespace LR1_SAI
             SendMessage($"Отлично. Теперь я знаю о приборе {deviceName}. Спасибо за информацию.");
         }
 
-        private void SendMessage(string message) =>
-            messageManager.SendMessage("Программа", message);
-
         private bool GetAnswer()
         {
+            SetRequiredAnswerType(RequiredAnswerType.Boolean);
+
             while (true)
             {
-                var answer = messageManager.ReadMessage()?.ToLower();
+                var answer = ReadMessage();
 
                 if (answer != "да" && answer != "нет")
                     SendMessage("Я не поняла ваш ответ. Напишите: \"да\" или \"нет\".");
@@ -210,7 +226,8 @@ namespace LR1_SAI
 
         private bool TryGetObjectName(out string? deviceName)
         {
-            var result = messageManager.ReadMessage();
+            SetRequiredAnswerType(RequiredAnswerType.ObjNames);
+            var result = ReadMessage();
 
             if (knlBase.Contains(new Node<string>(result, NodeType.Object)))
             {
@@ -224,15 +241,33 @@ namespace LR1_SAI
             }
         }
 
-        private string GetCommandSet()
+        private string GetUnknownTypeAnswer()
         {
-            var builder = new StringBuilder("Возможные запросы:\n");
+            SetRequiredAnswerType(RequiredAnswerType.Unknown);
+            return ReadMessage();
+        }
 
-            foreach (var command in actions)
-                builder.AppendLine("   " + command.Key);
+        private void SendMessage(string message) =>
+            messageManager.SendMessage("Программа", message);
 
-            builder.Remove(builder.Length - 1, 1);
-            return builder.ToString();
+        private string ReadMessage() =>
+            messageManager.ReadMessage().ToLower();
+
+        private void SetRequiredAnswerType(RequiredAnswerType type)
+        {
+            reqAnsType = type;
+            OnPropertyChanged(nameof(Tips));
+        }
+
+        protected void OnPropertyChanged(string propertyName = "") =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+        enum RequiredAnswerType
+        {
+            InitialRequests,
+            Boolean,
+            ObjNames,
+            Unknown
         }
     }
 }
