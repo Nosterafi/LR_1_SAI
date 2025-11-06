@@ -16,14 +16,17 @@ namespace LR1_SAI
 
         public DataType? ReadSave<DataType>()
         {
-            CheckSavePath();
-            using var readStream = File.OpenRead(savePath);
-
             try
             {
+                CheckSavePath();
+                using var readStream = File.OpenRead(savePath);
                 return JsonSerializer.Deserialize<DataType>(readStream, options);
             }
-            catch (JsonException) { return default; }
+            catch (Exception ex) 
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка при сохранении: {ex.Message}");
+                throw;
+            }
         }
 
         public void Save<DataType>(DataType data)
@@ -31,13 +34,13 @@ namespace LR1_SAI
             try
             {
                 CheckSavePath();
-
                 using var writeStream = File.Create(savePath);
                 JsonSerializer.Serialize(writeStream, data, options);
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Ошибка при сохранении: {ex.Message}");
+                throw;
             }
         }
 
@@ -45,6 +48,8 @@ namespace LR1_SAI
         {
             if (string.IsNullOrWhiteSpace(savePath))
                 throw new ArgumentException("Путь к файлу не установлен");
+
+            Console.WriteLine(Directory.GetCurrentDirectory());
 
             if (!File.Exists(savePath))
                 throw new FileNotFoundException($"Файл {savePath} не найден");

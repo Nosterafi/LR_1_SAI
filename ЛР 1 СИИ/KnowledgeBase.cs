@@ -32,6 +32,8 @@ public class KnowledgeBase : IHierarchicalBase
         Dictionary<int, Node<string>> nodes,
         int currentNodeHash)
     {
+        ArgumentNullException.ThrowIfNull(nodes);
+
         this.topNodeHash = topNodeHash;
         this.nodes = nodes;
         this.currentNodeHash = currentNodeHash;

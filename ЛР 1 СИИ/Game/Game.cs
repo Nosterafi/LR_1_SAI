@@ -1,13 +1,14 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 
 namespace LR1_SAI
 {
     public class Game : IGame
     {
         private const string savePath = "Save.json";
-        private const string defaultObjName = "Холодильник";
+        private const string defaultObjName = "холодильник";
 
-        private readonly KnowledgeBase? knlBase;
+        private readonly IHierarchicalBase? knlBase;
         private readonly Dictionary<string, Action> actions;
         private readonly MessageManager messageManager;
         private readonly SaveManager saveManager = new(savePath);
@@ -36,9 +37,12 @@ namespace LR1_SAI
         {
             this.messageManager = messageManager;
             saveManager = new SaveManager(savePath);
-            knlBase = saveManager.ReadSave<KnowledgeBase>();
 
-            if (knlBase == null)
+            try
+            {
+                knlBase = saveManager.ReadSave<KnowledgeBase>();
+            }
+            catch (Exception ex)
             {
                 SendMessage("К сожалению, при чтении сохранения произошла ошибка.\n" +
                     "Сейчас используется база знаний по-умолчанию.");
@@ -54,7 +58,8 @@ namespace LR1_SAI
                 { "Я хочу узнать, известно ли тебе о нужном мне приборе.", CheckAvailability },
             };
 
-            AppDomain.CurrentDomain.ProcessExit += ( sender, eventArgs ) => saveManager.Save(knlBase);
+            AppDomain.CurrentDomain.ProcessExit += ( sender, eventArgs ) => 
+            saveManager.Save((KnowledgeBase)knlBase);
         }
 
         public void Run()
@@ -250,8 +255,7 @@ namespace LR1_SAI
         private void SendMessage(string message) =>
             messageManager.SendMessage("Программа", message);
 
-        private string ReadMessage() =>
-            messageManager.ReadMessage().ToLower();
+        private string ReadMessage() => messageManager.ReadMessage();
 
         private void SetRequiredAnswerType(RequiredAnswerType type)
         {

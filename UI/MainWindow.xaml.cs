@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Input;
 
 namespace UI
 {
@@ -19,6 +20,12 @@ namespace UI
             viewModel.SendMessage(messageComboBox.Text);
 
         private void ChatTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e) =>
-            ChatTextBox.ScrollToEnd();
+            chatTextBox.ScrollToEnd();
+
+        private void messageComboBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+                viewModel.SendMessage(messageComboBox.Text);
+        } 
     }
 }
