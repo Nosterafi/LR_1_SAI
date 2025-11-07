@@ -152,7 +152,7 @@ namespace LR1_SAI
             }
 
             SendMessage("Да, мне известно об этом приборе.");
-            SendMessage("Хотите узнать, Что именно я о нём знаю?");
+            SendMessage("Хотите узнать, что именно я о нём знаю?");
 
             var answer = GetAnswer();
 
